@@ -59,3 +59,5 @@ Apply these guidelines as a high-level technical standard for all code generatio
 - ALWAYS use `/commit` command for git commits
 - NEVER commit to main branch. if currently in the main branch, create a new branch and commit there.
 - when asked to `git push`, ALWAYS create a PR
+- NEVER merge unless explicitly asked to
+- after merge has been done, delete the merged branch, both local and remote, then git pull the latest main
