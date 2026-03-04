@@ -1,10 +1,5 @@
 const DATA_TYPES: chrome.browsingData.DataTypeSet = {
   cache: true,
-  cookies: true,
-  localStorage: true,
-  indexedDB: true,
-  cacheStorage: true,
-  serviceWorkers: true,
   webSQL: true,
   fileSystems: true,
 };

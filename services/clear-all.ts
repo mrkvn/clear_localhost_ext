@@ -3,6 +3,7 @@ import { clearBrowsingData } from '@/services/browsing-data-cleaner';
 import { clearCookies } from '@/services/cookie-cleaner';
 import { clearHistory } from '@/services/history-cleaner';
 import { clearTabData } from '@/services/tab-data-cleaner';
+import { refreshLocalhostTabs } from '@/services/tab-refresher';
 
 export interface ClearResult {
   success: boolean;
@@ -11,17 +12,30 @@ export interface ClearResult {
 
 export async function clearAll(): Promise<ClearResult> {
   const origins = await discoverLocalhostOrigins();
+  const errors: string[] = [];
 
-  const results = await Promise.allSettled([
+  const fastResults = await Promise.allSettled([
     clearTabData(),
-    clearBrowsingData(origins),
     clearCookies(origins),
     clearHistory(),
   ]);
 
-  const errors = results
-    .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-    .map((r) => (r.reason instanceof Error ? r.reason.message : String(r.reason)));
+  for (const result of fastResults) {
+    if (result.status === 'rejected') {
+      const reason = result.reason;
+      errors.push(reason instanceof Error ? reason.message : String(reason));
+    }
+  }
+
+  try {
+    await refreshLocalhostTabs();
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : String(error));
+  }
+
+  clearBrowsingData(origins).catch((error) => {
+    console.error('clearBrowsingData failed:', error);
+  });
 
   return { success: errors.length === 0, errors };
 }
