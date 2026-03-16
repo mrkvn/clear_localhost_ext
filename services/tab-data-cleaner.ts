@@ -31,8 +31,12 @@ function clearAllTabData(): void {
   }
 }
 
-export async function clearTabData(): Promise<void> {
-  const tabs = await chrome.tabs.query({ url: [...LOCALHOST_URL_PATTERNS] });
+export async function clearTabData(
+  urlPatterns: string[] = [...LOCALHOST_URL_PATTERNS],
+): Promise<void> {
+  if (urlPatterns.length === 0) return;
+
+  const tabs = await chrome.tabs.query({ url: urlPatterns });
   const tabIds = tabs.map((tab) => tab.id).filter((id): id is number => id !== undefined);
 
   if (tabIds.length === 0) return;
