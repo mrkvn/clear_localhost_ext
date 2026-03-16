@@ -4,7 +4,15 @@ const MAX_HISTORY_RESULTS = 10000;
 
 const HISTORY_SEARCH_TERMS: readonly string[] = ['localhost', '127.0.0.1', '192.168.0.'] as const;
 
-export async function clearHistory(): Promise<void> {
+function matchesPort(url: string, port: string): boolean {
+  try {
+    return new URL(url).port === port;
+  } catch {
+    return false;
+  }
+}
+
+export async function clearHistory(port: string): Promise<void> {
   const results = await Promise.all(
     HISTORY_SEARCH_TERMS.map((text) =>
       chrome.history.search({
@@ -20,7 +28,8 @@ export async function clearHistory(): Promise<void> {
       .flat()
       .map((entry) => entry.url)
       .filter((url): url is string => url !== undefined)
-      .filter(isLocalDevUrl),
+      .filter(isLocalDevUrl)
+      .filter((url) => matchesPort(url, port)),
   );
 
   await Promise.all([...uniqueUrls].map((url) => chrome.history.deleteUrl({ url })));

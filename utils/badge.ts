@@ -4,12 +4,14 @@ const BADGE_COLORS = {
   success: '#4CAF50',
   partial: '#FF9800',
   error: '#F44336',
+  skip: '#9E9E9E',
 } as const;
 
 const BADGE_TEXT = {
   success: 'OK',
   partial: 'OK',
   error: 'ERR',
+  skip: 'N/A',
 } as const;
 
 type BadgeType = keyof typeof BADGE_COLORS;
