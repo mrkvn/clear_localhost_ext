@@ -73,3 +73,42 @@ export async function discoverAllOrigins(): Promise<DiscoveredOrigins> {
 
   return { localhostOrigins, privateIpOrigins };
 }
+
+function extractHostname(url: string): string | null {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
+
+export async function discoverPrivateIpHostnames(): Promise<string[]> {
+  const tabs = await chrome.tabs.query({});
+
+  const historyResults = await Promise.all(
+    PRIVATE_IP_HISTORY_SEARCH_TERMS.map((text) =>
+      chrome.history.search({
+        text,
+        startTime: 0,
+        maxResults: MAX_HISTORY_RESULTS,
+      }),
+    ),
+  );
+
+  const historyUrls = historyResults
+    .flat()
+    .map((entry) => entry.url)
+    .filter((url): url is string => url !== undefined)
+    .filter(isPrivateIpUrl);
+
+  const tabUrls = tabs
+    .map((tab) => tab.url)
+    .filter((url): url is string => url !== undefined)
+    .filter(isPrivateIpUrl);
+
+  const hostnames = [...historyUrls, ...tabUrls]
+    .map(extractHostname)
+    .filter((h): h is string => h !== null);
+
+  return [...new Set(hostnames)];
+}

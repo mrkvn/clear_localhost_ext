@@ -33,10 +33,23 @@ function clearAllTabData(): void {
 
 export async function clearTabData(
   urlPatterns: string[] = [...LOCALHOST_URL_PATTERNS],
+  portFilter?: string,
 ): Promise<void> {
   if (urlPatterns.length === 0) return;
 
-  const tabs = await chrome.tabs.query({ url: urlPatterns });
+  let tabs = await chrome.tabs.query({ url: urlPatterns });
+
+  if (portFilter !== undefined) {
+    tabs = tabs.filter((tab) => {
+      if (!tab.url) return false;
+      try {
+        return new URL(tab.url).port === portFilter;
+      } catch {
+        return false;
+      }
+    });
+  }
+
   const tabIds = tabs.map((tab) => tab.id).filter((id): id is number => id !== undefined);
 
   if (tabIds.length === 0) return;

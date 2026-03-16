@@ -3,8 +3,7 @@ import { clearCookies } from '@/services/cookie-cleaner';
 import { clearHistory } from '@/services/history-cleaner';
 import { clearTabData } from '@/services/tab-data-cleaner';
 import { refreshTabs } from '@/services/tab-refresher';
-import { LOCALHOST_URL_PATTERNS } from '@/utils/localhost';
-import { originsToUrlPatterns } from '@/utils/local-dev';
+import type { PortScopedOrigins } from '@/utils/local-dev';
 
 export interface ClearResult {
   success: boolean;
@@ -12,22 +11,15 @@ export interface ClearResult {
 }
 
 export async function clearAll(
-  localhostOrigins: string[],
-  grantedPrivateIpOrigins: string[],
+  scopedOrigins: PortScopedOrigins,
+  port: string,
 ): Promise<ClearResult> {
   const errors: string[] = [];
 
-  const allOrigins = [...localhostOrigins, ...grantedPrivateIpOrigins];
-
-  const allUrlPatterns = [
-    ...LOCALHOST_URL_PATTERNS,
-    ...originsToUrlPatterns(grantedPrivateIpOrigins),
-  ];
-
   const fastResults = await Promise.allSettled([
-    clearTabData(allUrlPatterns),
-    clearCookies(allOrigins),
-    clearHistory(),
+    clearTabData(scopedOrigins.portUrlPatterns, port),
+    clearCookies(scopedOrigins.cookieOrigins),
+    clearHistory(port),
   ]);
 
   for (const result of fastResults) {
@@ -38,12 +30,12 @@ export async function clearAll(
   }
 
   try {
-    await refreshTabs(allUrlPatterns);
+    await refreshTabs(scopedOrigins.portUrlPatterns, port);
   } catch (error) {
     errors.push(error instanceof Error ? error.message : String(error));
   }
 
-  clearBrowsingData(allOrigins).catch((error) => {
+  clearBrowsingData(scopedOrigins.portOrigins).catch((error) => {
     console.error('clearBrowsingData failed:', error);
   });
 
