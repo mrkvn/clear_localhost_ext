@@ -1,22 +1,32 @@
-import { discoverLocalhostOrigins } from '@/services/origin-discovery';
 import { clearBrowsingData } from '@/services/browsing-data-cleaner';
 import { clearCookies } from '@/services/cookie-cleaner';
 import { clearHistory } from '@/services/history-cleaner';
 import { clearTabData } from '@/services/tab-data-cleaner';
-import { refreshLocalhostTabs } from '@/services/tab-refresher';
+import { refreshTabs } from '@/services/tab-refresher';
+import { LOCALHOST_URL_PATTERNS } from '@/utils/localhost';
+import { originsToUrlPatterns } from '@/utils/local-dev';
 
 export interface ClearResult {
   success: boolean;
   errors: string[];
 }
 
-export async function clearAll(): Promise<ClearResult> {
-  const origins = await discoverLocalhostOrigins();
+export async function clearAll(
+  localhostOrigins: string[],
+  grantedPrivateIpOrigins: string[],
+): Promise<ClearResult> {
   const errors: string[] = [];
 
+  const allOrigins = [...localhostOrigins, ...grantedPrivateIpOrigins];
+
+  const allUrlPatterns = [
+    ...LOCALHOST_URL_PATTERNS,
+    ...originsToUrlPatterns(grantedPrivateIpOrigins),
+  ];
+
   const fastResults = await Promise.allSettled([
-    clearTabData(),
-    clearCookies(origins),
+    clearTabData(allUrlPatterns),
+    clearCookies(allOrigins),
     clearHistory(),
   ]);
 
@@ -28,12 +38,12 @@ export async function clearAll(): Promise<ClearResult> {
   }
 
   try {
-    await refreshLocalhostTabs();
+    await refreshTabs(allUrlPatterns);
   } catch (error) {
     errors.push(error instanceof Error ? error.message : String(error));
   }
 
-  clearBrowsingData(origins).catch((error) => {
+  clearBrowsingData(allOrigins).catch((error) => {
     console.error('clearBrowsingData failed:', error);
   });
 

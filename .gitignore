@@ -3,3 +3,5 @@ node_modules/
 .wxt/
 dist/
 *.tgz
+.DS_Store
+.claude/

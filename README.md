@@ -47,27 +47,27 @@ Click the extension icon in the toolbar. That's it.
 
 ## Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Development mode with hot reload |
-| `npm run dev:firefox` | Development mode for Firefox |
-| `npm run build` | Production build for Chrome |
-| `npm run build:firefox` | Production build for Firefox |
-| `npm run zip` | Create .zip for Chrome Web Store |
-| `npm run zip:firefox` | Create .zip for Firefox Add-ons |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
-| `npm run format:check` | Check formatting without writing |
+| Script                  | Description                      |
+| ----------------------- | -------------------------------- |
+| `npm run dev`           | Development mode with hot reload |
+| `npm run dev:firefox`   | Development mode for Firefox     |
+| `npm run build`         | Production build for Chrome      |
+| `npm run build:firefox` | Production build for Firefox     |
+| `npm run zip`           | Create .zip for Chrome Web Store |
+| `npm run zip:firefox`   | Create .zip for Firefox Add-ons  |
+| `npm run lint`          | Run ESLint                       |
+| `npm run format`        | Format code with Prettier        |
+| `npm run format:check`  | Check formatting without writing |
 
 ## Permissions
 
-| Permission | Reason |
-|------------|--------|
-| `browsingData` | Clear cache, WebSQL, and file system data |
-| `cookies` | Read and remove localhost cookies |
-| `history` | Search and delete localhost history entries |
-| `scripting` | Execute scripts in localhost tabs to clear in-page storage |
-| `tabs` | Query and reload localhost tabs |
+| Permission     | Reason                                                     |
+| -------------- | ---------------------------------------------------------- |
+| `browsingData` | Clear cache, WebSQL, and file system data                  |
+| `cookies`      | Read and remove localhost cookies                          |
+| `history`      | Search and delete localhost history entries                |
+| `scripting`    | Execute scripts in localhost tabs to clear in-page storage |
+| `tabs`         | Query and reload localhost tabs                            |
 
 Host permissions are scoped to `http(s)://localhost/*` and `http(s)://127.0.0.1/*` only.
 
