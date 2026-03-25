@@ -3,6 +3,7 @@ import { discoverPrivateIpHostnames } from '@/services/origin-discovery';
 import { ensurePermissions, checkExistingPermissions } from '@/services/permission-manager';
 import { showBadge } from '@/utils/badge';
 import { buildPortScopedOrigins, extractPortFromUrl, isLocalDevUrl } from '@/utils/local-dev';
+import { isPrivateIpHostname } from '@/utils/private-ip';
 
 let cachedPrivateIpHostnames: string[] = [];
 
@@ -26,10 +27,16 @@ export default defineBackground(() => {
         return;
       }
 
-      // Step 3: Request permissions for previously discovered private IPs.
+      // Step 2.5: Include active tab's private IP in permission request
+      const activeTabHostname = new URL(tab.url).hostname;
+      const hostnamesForPermissionRequest = isPrivateIpHostname(activeTabHostname)
+        ? [...new Set([activeTabHostname, ...cachedPrivateIpHostnames])]
+        : cachedPrivateIpHostnames;
+
+      // Step 3: Request permissions for active tab + previously discovered private IPs.
       // This MUST be the first await to preserve the user gesture context
       // required by chrome.permissions.request().
-      const preGranted = await ensurePermissions(hostnamesToOrigins(cachedPrivateIpHostnames));
+      const preGranted = await ensurePermissions(hostnamesToOrigins(hostnamesForPermissionRequest));
 
       // Step 4: Discover private IP hostnames (gesture may be lost after this point)
       const discoveredHostnames = await discoverPrivateIpHostnames();
